@@ -5,7 +5,7 @@ const HabitService = {
   getById(db, id) {
     return db.select('*').from('habits').where({ id }).first();
   },
-  addHabit(db, newHabit) {
+  addHabit(db, newHabit, user_id) {
     return db
       .insert(newHabit)
       .into('habits')
@@ -38,3 +38,10 @@ const HabitService = {
 };
 
 module.exports = HabitService;
+//every day at or after midnight, process previous days data
+//select from habit_completion table where the completed date is >
+//start of current day & < end of the current day
+//increment or return to 0
+
+//cron - to create an endpoint which processes habit completions
+//cron - calls endpoint every day at midnight

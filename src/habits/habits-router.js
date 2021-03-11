@@ -10,7 +10,7 @@ const serializeHabit = habit => ({
   description: habit.description,
   current_streak: habit.current_streak,
   best_streak: habit.best_streak,
-  date_completed: habit.date_completed,
+  // date_completed: habit.date_completed,
   user_id: habit.user_id,
 });
 
@@ -30,25 +30,41 @@ habitsRouter
         }
       })
       .catch(next);
+  })
+  //this post endpoint will create a new habit
+  .post(jsonBodyParser, (req, res, next) => {
+    const { name, description, user_id } = req.body;
+    const newHabit = {
+      name,
+      description,
+      current_streak: 0,
+      best_streak: 0,
+      // date_completed: null,
+      user_id: req.user.id,
+    };
+
+    if (!name) {
+      return res
+        .status(400)
+        .json({ error: { message: `Missing name in request body` } });
+    }
+    if (!description) {
+      return res
+        .status(400)
+        .json({ error: { message: `Missing description in request body` } });
+    }
+
+    HabitsService.addHabit(req.app.get('db'), newHabit)
+      .then(habit => {
+        res.status(201).location('/').json(habit);
+      })
+      .catch(next);
   });
 
-// habitsRouter.use(requireAuth).use(async (req, res, next) => {
-//   try {
-//     const habit = await HabitsService.getUserHabits(
-//       req.app.get('db'),
-//       req.user.id
-//     );
-
-//     if (!habit)
-//       return res.status(404).json({
-//         error: `You don't have any habits yet, create one to get started!`,
-//       });
-
-//     req.habit = habit;
-//     next();
-//   } catch (error) {
-//     next(error);
-//   }
-// });
+//next endpoint will
+//---mark a habit as complete
+//---increment the current_streak
+//---increment best_streak if applicable
+//---place timestamp on date_completed
 
 module.exports = habitsRouter;
